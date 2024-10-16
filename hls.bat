@@ -1,0 +1,1 @@
+ffmpeg -i rtsp://admin:ist20171016@192.168.1.55:12409/Streaming/Channels/102 -c:v copy -an -start_number 0 -f hls -hls_time 1 -hls_list_size 5 -hls_flags delete_segments static/live1.m3u8

@@ -18,16 +18,12 @@ func (mgr *FFmpegMgr) Start(config *Config) {
 	mgr.liveObjs[1] = NewFFmpegObj(&config.Streams.Live[1], &config.FfmpegConfig)
 
 	// Starting two replay FFmpegObj
-	streamConfig := &StreamConfig{}
 
-	mgr.replayObjs[0] = NewFFmpegObj(streamConfig, &config.FfmpegConfig)
-	mgr.replayObjs[1] = NewFFmpegObj(streamConfig, &config.FfmpegConfig)
+	mgr.replayObjs[0] = NewFFmpegObj(&config.Streams.Replay[0], &config.FfmpegConfig)
+	mgr.replayObjs[1] = NewFFmpegObj(&config.Streams.Replay[1], &config.FfmpegConfig)
 
 	// Start all FFmpeg processes
 	for _, obj := range mgr.liveObjs {
-		obj.Start()
-	}
-	for _, obj := range mgr.replayObjs {
 		obj.Start()
 	}
 }

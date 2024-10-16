@@ -41,7 +41,7 @@ type StreamConfig struct {
 func CreateDefaultConfig() *Config {
 	config := &Config{}
 	config.Server.Port = 8080
-	config.Logging.LogFile = "server.log"
+	config.Logging.LogFile = "log/server.log"
 	config.Logging.MaxSize = 10
 	config.Logging.MaxBackups = 3
 	config.Logging.MaxAge = 30
@@ -52,12 +52,22 @@ func CreateDefaultConfig() *Config {
 	config.FfmpegConfig.Hls_list_size = 5
 	config.Streams.Live = []StreamConfig{
 		{
-			StreamURL: "rtp://live1.stream",
-			HLSURL:    "/var/www/live1.m3u8",
+			StreamURL: "rtsp://admin:ist20171016@192.168.1.55:12409/Streaming/Channels/102",
+			HLSURL:    "static/live1/live.m3u8",
 		},
 		{
-			StreamURL: "rtp://live2.stream",
-			HLSURL:    "/var/www/live2.m3u8",
+			StreamURL: "rtsp://admin:ist20171016@192.168.1.55:12409/Streaming/Channels/402",
+			HLSURL:    "static/live2/live.m3u8",
+		},
+	}
+	config.Streams.Replay = []StreamConfig{
+		{
+			StreamURL: "rtsp://admin:ist20171016@192.168.1.55:12409/Streaming/tracks/101?starttime=20240926t090000z&endtime=20240926t092000z",
+			HLSURL:    "static/Replay1/replay.m3u8",
+		},
+		{
+			StreamURL: "rtsp://admin:ist20171016@192.168.1.55:12409/Streaming/tracks/401?starttime=20240926t090000z&endtime=20240926t092000z",
+			HLSURL:    "static/Replay2/replay.m3u8",
 		},
 	}
 

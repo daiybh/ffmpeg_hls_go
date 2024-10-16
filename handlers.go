@@ -47,11 +47,13 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("starttime") && r.URL.Query().Has("endtime") {
 		log.Printf("playHandler: starttime: %s, endtime: %s\n", r.URL.Query().Get("starttime"), r.URL.Query().Get("endtime"))
 		ffmpegObj = ffmpegMgr.GetReplayObj(index)
+
+		ffmpegObj.StartReplay(r.URL.Query().Get("starttime"), r.URL.Query().Get("endtime"))
 	}
 	if ffmpegObj != nil {
-		log.Printf("playHandler: %s\n", ffmpegObj.GetHLSURL())
-		//http.Redirect(w, r, ffmpegObj.GetHLSURL(), http.StatusFound)
-		http.Redirect(w, r, "/static/server.log", http.StatusFound)
+		log.Printf("find playHandler: %s\n", ffmpegObj.GetHLSURL())
+		http.Redirect(w, r, "/"+ffmpegObj.GetHLSURL(), http.StatusFound)
+		//http.Redirect(w, r, "/static/server.log", http.StatusFound)
 	} else {
 		http.Error(w, "stream not found", http.StatusNotFound)
 	}
@@ -83,13 +85,12 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
-	objs := make([]map[string]string, len(ffmpegMgr.liveObjs))
+	objs := make([]map[string]string, 4)
 	for i, obj := range ffmpegMgr.liveObjs {
-		objs[i] = map[string]string{
-			"hls_url":    obj.GetHLSURL(),
-			"stream_url": obj.streamConfig.StreamURL,
-			"cmd":        obj.cmd.ProcessState.String(),
-		}
+		objs[i] = obj.Json()
+	}
+	for i, obj := range ffmpegMgr.replayObjs {
+		objs[i+2] = obj.Json()
 	}
 	encoder := json.NewEncoder(w)
 	encoder.SetEscapeHTML(false)

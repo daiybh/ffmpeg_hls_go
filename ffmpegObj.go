@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -21,14 +24,40 @@ func NewFFmpegObj(streamConfig *StreamConfig, ffmpegConfig *FFmpegConfig) *FFmpe
 		ffmpegConfig: ffmpegConfig,
 	}
 }
-
+func (f *FFmpegObj) Json() map[string]string {
+	result := map[string]string{
+		"stream_url":   f.streamConfig.StreamURL,
+		"hls_url":      f.streamConfig.HLSURL,
+		"cmd":          "",
+		"processState": "",
+	}
+	if f.cmd != nil {
+		result["cmd"] = f.cmd.String()
+		result["processState"] = f.cmd.ProcessState.String()
+	}
+	return result
+}
+func (f *FFmpegObj) StartReplay(starttime string, endtime string) error {
+	urls := strings.Split(f.streamConfig.StreamURL, "?")
+	streamURL := fmt.Sprintf("%s?starttime=%s&endtime=%s", urls[0], starttime, endtime)
+	f.streamConfig.StreamURL = streamURL
+	f.Stop()
+	return f.Start()
+}
 func (f *FFmpegObj) Start() error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-
+	if f.streamConfig.StreamURL == "" || f.streamConfig.HLSURL == "" {
+		return fmt.Errorf("stream_url or hls_url is empty")
+	}
+	destDir := filepath.Dir(f.streamConfig.HLSURL)
+	os.MkdirAll(destDir, 0755)
 	cmd := exec.Command(f.ffmpegConfig.FfmpegPath,
 		"-i",
 		f.streamConfig.StreamURL,
+		"-c:v", "copy",
+		"-an",
+		"-start_number", "0",
 		"-f", "hls",
 		"-hls_time", strconv.Itoa(f.ffmpegConfig.Hls_time),
 		"-hls_list_size", strconv.Itoa(f.ffmpegConfig.Hls_list_size),
@@ -41,8 +70,8 @@ func (f *FFmpegObj) Start() error {
 		log.Println(wrappedErr)
 		return wrappedErr
 	}
-	log.Printf("cmd:%s %s", cmd.Path, cmd.Args)
-	log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
+	log.Printf("%s", cmd.Args)
+	//log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
 	log.Printf("FFMPEG pid:%d state:%s", cmd.Process.Pid, cmd.ProcessState.String())
 	go cmd.Wait() // Run FFmpeg asynchronously
 	return nil
