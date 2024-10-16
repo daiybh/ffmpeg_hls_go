@@ -45,8 +45,6 @@ func main() {
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/live/", liveHandler)
-	http.HandleFunc("/replay/", replayHandler)
 	http.HandleFunc("/ch/", playHandler)
 	http.HandleFunc("/status/", statusHandler)
 

@@ -8,26 +8,6 @@ import (
 	"strings"
 )
 
-func liveHandler(w http.ResponseWriter, r *http.Request) {
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) != 3 {
-		log.Printf("Invalid path: %s\n", r.URL.Path)
-		http.Error(w, "Invalid path", http.StatusBadRequest)
-		return
-	}
-	index, err := strconv.Atoi(pathParts[2])
-	if err != nil || index < 1 || index > 2 {
-		log.Printf("Invalid live stream number: %s\n", pathParts[2])
-		http.Error(w, "Invalid live stream number", http.StatusBadRequest)
-		return
-	}
-	liveObj := ffmpegMgr.GetLiveObj(index)
-	if liveObj != nil {
-		http.Redirect(w, r, liveObj.GetHLSURL(), http.StatusFound)
-	} else {
-		http.Error(w, "Live stream not found", http.StatusNotFound)
-	}
-}
 func playHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("playHandler: %s %s\n", r.URL.Path, r.URL.Query())
 	pathParts := strings.Split(r.URL.Path, "/")
@@ -43,6 +23,7 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid live stream number", http.StatusBadRequest)
 		return
 	}
+	index = index - 1
 	ffmpegObj := ffmpegMgr.GetLiveObj(index)
 	if r.URL.Query().Has("starttime") && r.URL.Query().Has("endtime") {
 		log.Printf("playHandler: starttime: %s, endtime: %s\n", r.URL.Query().Get("starttime"), r.URL.Query().Get("endtime"))
@@ -56,26 +37,6 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		//http.Redirect(w, r, "/static/server.log", http.StatusFound)
 	} else {
 		http.Error(w, "stream not found", http.StatusNotFound)
-	}
-}
-func replayHandler(w http.ResponseWriter, r *http.Request) {
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) != 3 {
-		log.Printf("Invalid path: %s\n", r.URL.Path)
-		http.Error(w, "Invalid path", http.StatusBadRequest)
-		return
-	}
-	index, err := strconv.Atoi(pathParts[2])
-	if err != nil || index < 1 || index > 2 {
-		log.Printf("Invalid replay stream number: %s\n", pathParts[2])
-		http.Error(w, "Invalid replay stream number", http.StatusBadRequest)
-		return
-	}
-	replayObj := ffmpegMgr.GetReplayObj(index)
-	if replayObj != nil {
-		http.Redirect(w, r, replayObj.GetHLSURL(), http.StatusFound)
-	} else {
-		http.Error(w, "Replay stream not found", http.StatusNotFound)
 	}
 }
 
