@@ -1,0 +1,4 @@
+config.yaml
+ffmpeg_hls.exe
+static/
+server.log
