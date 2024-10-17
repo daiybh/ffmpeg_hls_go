@@ -1,4 +1,4 @@
-module ffmpeg_hls
+module ffmpeg_hls_go
 
 go 1.22.6
 

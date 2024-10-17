@@ -1,6 +1,7 @@
-package main
+package video
 
 import (
+	"ffmpeg_hls_go/pkg/utils"
 	"fmt"
 	"log"
 	"os"
@@ -12,13 +13,13 @@ import (
 )
 
 type FFmpegObj struct {
-	streamConfig *StreamConfig
-	ffmpegConfig *FFmpegConfig
+	streamConfig *utils.StreamConfig
+	ffmpegConfig *utils.FFmpegConfig
 	cmd          *exec.Cmd
 	mu           sync.Mutex
 }
 
-func NewFFmpegObj(streamConfig *StreamConfig, ffmpegConfig *FFmpegConfig) *FFmpegObj {
+func NewFFmpegObj(streamConfig *utils.StreamConfig, ffmpegConfig *utils.FFmpegConfig) *FFmpegObj {
 	return &FFmpegObj{
 		streamConfig: streamConfig,
 		ffmpegConfig: ffmpegConfig,

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"ffmpeg_hls_go/internal/video"
+	"ffmpeg_hls_go/internal/video/handles"
+	"ffmpeg_hls_go/pkg/utils"
 	"fmt"
 	"io"
 	"log"
@@ -11,7 +14,7 @@ import (
 )
 
 // Configure the logger to rotate automatically
-func setupLogger(config *Config) io.Writer {
+func setupLogger(config *utils.Config) io.Writer {
 	loggerFile := &lumberjack.Logger{
 		Filename:   config.Logging.LogFile,    // Log file name
 		MaxSize:    config.Logging.MaxSize,    // Max size in MB before rotating
@@ -26,10 +29,10 @@ func setupLogger(config *Config) io.Writer {
 	return loggerFile
 }
 
-var ffmpegMgr *FFmpegMgr
+var ffmpegMgr *video.FFmpegMgr
 
 func main() {
-	config, err := LoadConfig("config.yaml")
+	config, err := utils.LoadConfig("config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,15 +41,15 @@ func main() {
 
 	log.Printf("Starting HLS server...")
 	// Start the FFmpeg Manager
-	ffmpegMgr = NewFFmpegMgr()
+	ffmpegMgr = video.GetFFmpegMgr()
 	ffmpegMgr.Start(config)
 
 	// Setup HTTP routes
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/ch/", playHandler)
-	http.HandleFunc("/status/", statusHandler)
+	http.HandleFunc("/ch/", handles.PlayHandler)
+	http.HandleFunc("/status/", handles.StatusHandler)
 
 	// Start the HTTP server
 	address := fmt.Sprintf(":%d", config.Server.Port)

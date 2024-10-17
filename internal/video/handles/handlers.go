@@ -1,14 +1,15 @@
-package main
+package handles
 
 import (
 	"encoding/json"
+	"ffmpeg_hls_go/internal/video"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-func playHandler(w http.ResponseWriter, r *http.Request) {
+func PlayHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("playHandler: %s %s\n", r.URL.Path, r.URL.Query())
 	pathParts := strings.Split(r.URL.Path, "/")
 	if len(pathParts) != 3 {
@@ -24,10 +25,10 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	index = index - 1
-	ffmpegObj := ffmpegMgr.GetLiveObj(index)
+	ffmpegObj := video.GetFFmpegMgr().GetLiveObj(index)
 	if r.URL.Query().Has("starttime") && r.URL.Query().Has("endtime") {
 		log.Printf("playHandler: starttime: %s, endtime: %s\n", r.URL.Query().Get("starttime"), r.URL.Query().Get("endtime"))
-		ffmpegObj = ffmpegMgr.GetReplayObj(index)
+		ffmpegObj = video.GetFFmpegMgr().GetReplayObj(index)
 
 		ffmpegObj.StartReplay(r.URL.Query().Get("starttime"), r.URL.Query().Get("endtime"))
 	}
@@ -40,17 +41,17 @@ func playHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request) {
+func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("statusHandler: %s %s\n", r.URL.Path, r.URL.Query())
 
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
 	objs := make([]map[string]string, 4)
-	for i, obj := range ffmpegMgr.liveObjs {
+	for i, obj := range video.GetFFmpegMgr().LiveObjs {
 		objs[i] = obj.Json()
 	}
-	for i, obj := range ffmpegMgr.replayObjs {
+	for i, obj := range video.GetFFmpegMgr().ReplayObjs {
 		objs[i+2] = obj.Json()
 	}
 	encoder := json.NewEncoder(w)
