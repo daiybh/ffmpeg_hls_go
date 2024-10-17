@@ -1,9 +1,10 @@
-package utils
+package configs
 
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 
 	"gopkg.in/yaml.v2"
 )
@@ -19,6 +20,7 @@ type Config struct {
 		MaxBackups int    `yaml:"max_backups"`
 		MaxAge     int    `yaml:"max_age"`
 		Compress   bool   `yaml:"compress"`
+		Loglevel   int    `yaml:"Loglevel"`
 	} `yaml:"logging"`
 
 	FfmpegConfig FFmpegConfig `yaml:"FFmpegConfig"`
@@ -45,6 +47,7 @@ func CreateDefaultConfig() *Config {
 	config.Logging.MaxSize = 10
 	config.Logging.MaxBackups = 3
 	config.Logging.MaxAge = 30
+	config.Logging.Loglevel = 4
 	config.Logging.Compress = true
 
 	config.FfmpegConfig.FfmpegPath = "ffmpeg"
@@ -90,7 +93,7 @@ func WriteConfigToFile(config *Config, filename string) error {
 }
 
 // LoadConfig reads and parses the YAML configuration file
-func LoadConfig(filename string) (*Config, error) {
+func loadConfig(filename string) (*Config, error) {
 	// Read the file content
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -115,4 +118,16 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+var (
+	configInstance *Config
+	configOnce     sync.Once
+)
+
+func GetConfigInstance() *Config {
+	configOnce.Do(func() {
+		configInstance, _ = loadConfig("config.yaml")
+	})
+	return configInstance
 }

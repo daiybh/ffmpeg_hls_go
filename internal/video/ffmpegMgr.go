@@ -1,8 +1,8 @@
 package video
 
 import (
-	"ffmpeg_hls_go/pkg/utils"
-	"log"
+	"ffmpeg_hls_go/internal/configs"
+	"ffmpeg_hls_go/internal/logger"
 	"sync"
 )
 
@@ -19,10 +19,12 @@ var (
 func GetFFmpegMgr() *FFmpegMgr {
 	once.Do(func() {
 		ffmpegMgrInstance = &FFmpegMgr{}
+
 	})
 	return ffmpegMgrInstance
 }
-func (mgr *FFmpegMgr) Start(config *utils.Config) {
+func (mgr *FFmpegMgr) Start(config *configs.Config) {
+	log := logger.GetLoggerInstance()
 	log.Println("FFmpegMgr start....")
 	// Starting two live FFmpegObj
 	mgr.LiveObjs[0] = NewFFmpegObj(&config.Streams.Live[0], &config.FfmpegConfig)

@@ -1,9 +1,9 @@
 package video
 
 import (
-	"ffmpeg_hls_go/pkg/utils"
+	"ffmpeg_hls_go/internal/configs"
+	"ffmpeg_hls_go/internal/logger"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,13 +13,13 @@ import (
 )
 
 type FFmpegObj struct {
-	streamConfig *utils.StreamConfig
-	ffmpegConfig *utils.FFmpegConfig
+	streamConfig *configs.StreamConfig
+	ffmpegConfig *configs.FFmpegConfig
 	cmd          *exec.Cmd
 	mu           sync.Mutex
 }
 
-func NewFFmpegObj(streamConfig *utils.StreamConfig, ffmpegConfig *utils.FFmpegConfig) *FFmpegObj {
+func NewFFmpegObj(streamConfig *configs.StreamConfig, ffmpegConfig *configs.FFmpegConfig) *FFmpegObj {
 	return &FFmpegObj{
 		streamConfig: streamConfig,
 		ffmpegConfig: ffmpegConfig,
@@ -48,6 +48,7 @@ func (f *FFmpegObj) StartReplay(starttime string, endtime string) error {
 func (f *FFmpegObj) Start() error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	log := logger.GetLoggerInstance()
 	if f.streamConfig.StreamURL == "" || f.streamConfig.HLSURL == "" {
 		return fmt.Errorf("stream_url or hls_url is empty")
 	}
@@ -71,6 +72,7 @@ func (f *FFmpegObj) Start() error {
 		log.Println(wrappedErr)
 		return wrappedErr
 	}
+
 	log.Printf("%s", cmd.Args)
 	//log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
 	log.Printf("FFMPEG pid:%d state:%s", cmd.Process.Pid, cmd.ProcessState.String())
