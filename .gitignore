@@ -1,6 +1,7 @@
 config.yaml
 ffmpeg_hls.exe
 static/
-server.log
+*.log
 ffmpeg_hls_go.zip
 ffmpeg_hls_go.7z
+*.exe
