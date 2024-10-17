@@ -27,13 +27,13 @@ func (mgr *FFmpegMgr) Start(config *configs.Config) {
 	log := logger.GetLoggerInstance()
 	log.Println("FFmpegMgr start....")
 	// Starting two live FFmpegObj
-	mgr.LiveObjs[0] = NewFFmpegObj(&config.Streams.Live[0], &config.FfmpegConfig)
-	mgr.LiveObjs[1] = NewFFmpegObj(&config.Streams.Live[1], &config.FfmpegConfig)
+	mgr.LiveObjs[0] = NewFFmpegObj(true, 0)
+	mgr.LiveObjs[1] = NewFFmpegObj(true, 1)
 
 	// Starting two replay FFmpegObj
 
-	mgr.ReplayObjs[0] = NewFFmpegObj(&config.Streams.Replay[0], &config.FfmpegConfig)
-	mgr.ReplayObjs[1] = NewFFmpegObj(&config.Streams.Replay[1], &config.FfmpegConfig)
+	mgr.ReplayObjs[0] = NewFFmpegObj(false, 0)
+	mgr.ReplayObjs[1] = NewFFmpegObj(false, 1)
 
 	// Start all FFmpeg processes
 	for _, obj := range mgr.LiveObjs {

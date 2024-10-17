@@ -5,6 +5,7 @@ import (
 	"ffmpeg_hls_go/internal/logger"
 	"ffmpeg_hls_go/internal/video"
 	"ffmpeg_hls_go/internal/video/handles"
+	"os"
 
 	"fmt"
 	"net/http"
@@ -15,8 +16,9 @@ var ffmpegMgr *video.FFmpegMgr
 func main() {
 	config := configs.GetConfigInstance()
 	log := logger.GetLoggerInstance()
+	pid := os.Getpid()
 	log.Info("")
-	log.Info("##############Starting server...#####################")
+	log.Infof("##############Starting server [%d]...#####################", pid)
 
 	// Start the FFmpeg Manager
 	ffmpegMgr = video.GetFFmpegMgr()
