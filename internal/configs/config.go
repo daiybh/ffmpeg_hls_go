@@ -47,7 +47,7 @@ func CreateDefaultConfig() *Config {
 	config.Logging.MaxSize = 10
 	config.Logging.MaxBackups = 3
 	config.Logging.MaxAge = 30
-	config.Logging.Loglevel = 4
+	config.Logging.Loglevel = 1
 	config.Logging.Compress = true
 
 	config.FfmpegConfig.FfmpegPath = "ffmpeg"

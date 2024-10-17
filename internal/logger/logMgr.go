@@ -34,7 +34,7 @@ func SetLogLevel(logger *logrus.Logger, config *configs.Config) {
 type CustomFormatter struct{}
 
 func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	pid := os.Getegid()
+	pid := os.Getpid()
 	logMessage := fmt.Sprintf("%s [PID: %d] [%s] %s\n", entry.Time.Format("2006-01-02 15:04:05"), pid, entry.Level, entry.Message)
 	return []byte(logMessage), nil
 }
@@ -64,9 +64,9 @@ func GetFFmpegLogger() *logrus.Logger {
 		ffmpeg_logInstance = logrus.New()
 
 		// 创建多输出的日志写入器
-		multiWriter := io.MultiWriter(os.Stdout, logger)
+		//multiWriter := io.MultiWriter(os.Stdout, logger)
 
-		ffmpeg_logInstance.SetOutput(multiWriter)
+		ffmpeg_logInstance.SetOutput(logger)
 
 		// 设置日志级别
 		SetLogLevel(ffmpeg_logInstance, config)

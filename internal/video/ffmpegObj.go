@@ -64,6 +64,7 @@ func (f *FFmpegObj) Start() error {
 	destDir := filepath.Dir(f.hlsURL)
 	os.MkdirAll(destDir, 0755)
 	cmd := exec.Command(f.ffmpegConfig.FfmpegPath,
+		"-hide_banner",
 		"-i",
 		f.streamURL,
 		"-c:v", "copy",
@@ -93,15 +94,16 @@ func (f *FFmpegObj) Start() error {
 	//log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
 	log.Printf("FFMPEG pid:%d state:%s", cmd.Process.Pid, cmd.ProcessState.String())
 	go func() {
-		if f.IsLive {
-			for {
-				if err := cmd.Wait(); err != nil {
-					log.Errorf("FFmpeg pid:%d exited with error %v", cmd.Process.Pid, err)
+		for {
+			if err := cmd.Wait(); err != nil {
+				log.Errorf("FFmpeg pid:%d exited with error %v", cmd.Process.Pid, err)
+				if f.IsLive {
 					f.Start()
+				} else {
+					break
 				}
 			}
 		}
-		cmd.Wait() // Run FFmpeg asynchronously
 		log.Errorf("ffmpeg %d exited", cmd.Process.Pid)
 	}()
 	return nil
