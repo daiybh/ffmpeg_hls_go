@@ -11,7 +11,12 @@ import (
 	"net/http"
 )
 
-var ffmpegMgr *video.FFmpegMgr
+var (
+	ffmpegMgr *video.FFmpegMgr
+	gitHash   string
+	buildTime string
+	goVersion string
+)
 
 func main() {
 	config := configs.GetConfigInstance()
@@ -19,6 +24,7 @@ func main() {
 	pid := os.Getpid()
 	log.Info("")
 	log.Infof("##############Starting server [%d]...#####################", pid)
+	log.Infof("##############GitHash: %s, BuildTime: %s, GoVersion: %s....#####################", gitHash, buildTime, goVersion)
 
 	// Start the FFmpeg Manager
 	ffmpegMgr = video.GetFFmpegMgr()
