@@ -74,6 +74,7 @@ func (f *FFmpegObj) Start() error {
 		"-hls_time", strconv.Itoa(f.ffmpegConfig.Hls_time),
 		"-hls_list_size", strconv.Itoa(f.ffmpegConfig.Hls_list_size),
 		"-hls_flags", "delete_segments",
+		"-metadata title", f.hlsURL,
 		f.hlsURL)
 	f.cmd = cmd
 
