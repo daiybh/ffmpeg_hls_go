@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type FFmpegObj struct {
@@ -54,12 +55,15 @@ func (f *FFmpegObj) StartReplay(starttime string, endtime string) error {
 	f.Stop()
 	return f.Start()
 }
-func (f *FFmpegObj) Start() error {
+
+// 启动 ffmpeg 进程
+func (f *FFmpegObj) startFFmpeg() (*exec.Cmd, error) {
+	// 这里指定你的 ffmpeg 命令和参数
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	log := logger.GetLoggerInstance()
 	if f.streamURL == "" || f.hlsURL == "" {
-		return fmt.Errorf("stream_url or hls_url is empty")
+		return nil, fmt.Errorf("stream_url or hls_url is empty")
 	}
 	destDir := filepath.Dir(f.hlsURL)
 	os.MkdirAll(destDir, 0755)
@@ -85,31 +89,40 @@ func (f *FFmpegObj) Start() error {
 	if err != nil {
 		wrappedErr := fmt.Errorf("failed to start FFmpeg: %w", err)
 		log.Println(wrappedErr)
-		return wrappedErr
+		return cmd, wrappedErr
 	}
 	ffmpegLogger := logger.GetFFmpegLogger()
 	go io.Copy(ffmpegLogger.Writer(), stdout)
 	go io.Copy(ffmpegLogger.Writer(), stderr)
 
 	log.Printf("%s", cmd.Args)
-	//log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
+	log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
 	log.Printf("FFMPEG pid:%d state:%s", cmd.Process.Pid, cmd.ProcessState.String())
-	go func() {
-		for {
-			if err := cmd.Wait(); err != nil {
-				log.Errorf("FFmpeg pid:%d exited with error %v", cmd.Process.Pid, err)
-				if f.IsLive {
-					f.Start()
-				} else {
-					break
-				}
-			}
-		}
-		log.Errorf("ffmpeg %d exited", cmd.Process.Pid)
-	}()
+	return cmd, nil
+}
+
+// 监控 ffmpeg 进程
+func (f *FFmpegObj) Start() error {
+	cmd, _ := f.startFFmpeg()
+	if f.IsLive {
+		go f.monitorFFmpeg(cmd)
+	}
 	return nil
 }
 
+func (f *FFmpegObj) monitorFFmpeg(cmd *exec.Cmd) {
+	for {
+		// 检查进程是否退出
+		err := cmd.Process.Signal(nil)
+		if err != nil {
+			// 进程已经退出
+			cmd, _ = f.startFFmpeg() // 重新启动 ffmpeg
+		}
+
+		// 每隔 5 秒检查一次进程状态
+		time.Sleep(1 * time.Second)
+	}
+}
 func (f *FFmpegObj) Stop() error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
