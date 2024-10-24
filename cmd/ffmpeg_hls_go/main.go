@@ -2,10 +2,10 @@ package main
 
 import (
 	"ffmpeg_hls_go/internal/configs"
+	"ffmpeg_hls_go/internal/handles"
 	"ffmpeg_hls_go/internal/logger"
 	"ffmpeg_hls_go/internal/token"
 	"ffmpeg_hls_go/internal/video"
-	"ffmpeg_hls_go/internal/video/handles"
 	"fmt"
 	"net/http"
 	"os"

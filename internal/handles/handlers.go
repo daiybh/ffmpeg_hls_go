@@ -11,7 +11,7 @@ import (
 )
 
 func PlayHandler(w http.ResponseWriter, r *http.Request) {
-	log := logger.GetLoggerInstance()
+	log := logger.GetLogger("handlers.log", false)
 	log.Printf("playHandler: %s %s", r.URL.Path, r.URL.Query())
 	pathParts := strings.Split(r.URL.Path, "/")
 	if len(pathParts) != 3 {

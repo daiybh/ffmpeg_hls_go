@@ -14,11 +14,14 @@ playload = {
 #密码通过SM3加密传输，加密方法：
 #SM3(username+requestTime+ allocPassword), 生成32的16进制字符串；
 playload["requestTimestamp"] = str(int(time.time() ))
+playload["requestTimestamp"] = '1729687611'
 xStr=f'{playload["username"]}{playload["requestTimestamp"]}{playload["password"]}'
 data_in_bytes = xStr.encode('utf-8')
+print("xStr", data_in_bytes)
 playload["password"] = sm3.sm3_hash(func.bytes_to_list(data_in_bytes))
 
-print(playload)
-print("")
-r = requests.post(url, json=playload)
-print(r.text)
+print("s3.hash",playload["password"])
+
+#print("")
+#r = requests.post(url, json=playload)
+#print(r.text)

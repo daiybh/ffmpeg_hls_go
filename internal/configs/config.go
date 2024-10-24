@@ -38,6 +38,7 @@ type FFmpegConfig struct {
 	FfmpegPath    string `yaml:"ffmpeg_path"`
 	Hls_time      int    `yaml:"hls_time"`
 	Hls_list_size int    `yaml:"hls_list_size"`
+	Loglevel      string `yaml:"loglevel"`
 }
 type StreamConfig struct {
 	StreamURL string `yaml:"stream_url"`
@@ -57,6 +58,9 @@ func CreateDefaultConfig() *Config {
 	config.FfmpegConfig.FfmpegPath = "ffmpeg"
 	config.FfmpegConfig.Hls_time = 1
 	config.FfmpegConfig.Hls_list_size = 5
+	config.FfmpegConfig.Loglevel = "error"
+
+	// 以下是配置 HLS 流
 	config.Streams.Live = []StreamConfig{
 		{
 			StreamURL: "rtsp://admin:ist20171016@192.168.1.55:12409/Streaming/Channels/102",
@@ -117,7 +121,7 @@ func loadConfig(filename string) (*Config, error) {
 		}
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
-	config := &Config{}
+	config := CreateDefaultConfig()
 	// Parse the YAML content
 	err = yaml.Unmarshal(data, config)
 	if err != nil {
