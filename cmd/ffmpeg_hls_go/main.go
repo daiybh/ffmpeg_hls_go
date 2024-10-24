@@ -3,12 +3,12 @@ package main
 import (
 	"ffmpeg_hls_go/internal/configs"
 	"ffmpeg_hls_go/internal/logger"
+	"ffmpeg_hls_go/internal/token"
 	"ffmpeg_hls_go/internal/video"
 	"ffmpeg_hls_go/internal/video/handles"
-	"os"
-
 	"fmt"
 	"net/http"
+	"os"
 )
 
 var (
@@ -21,11 +21,13 @@ var (
 func main() {
 	config := configs.GetConfigInstance()
 	log := logger.GetLoggerInstance()
+
 	pid := os.Getpid()
 	log.Info("")
 	log.Infof("##############Starting server [%d]...#####################", pid)
 	log.Infof("##############GitHash: %s, BuildTime: %s, GoVersion: %s....#####################", gitHash, buildTime, goVersion)
 
+	token.Init()
 	// Start the FFmpeg Manager
 	ffmpegMgr = video.GetFFmpegMgr()
 	ffmpegMgr.Start(config)
