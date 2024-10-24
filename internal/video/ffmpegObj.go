@@ -49,6 +49,9 @@ func (f *FFmpegObj) Json() map[string]string {
 	return result
 }
 func (f *FFmpegObj) StartReplay(starttime string, endtime string) error {
+	if f.streamURL == "" {
+		return fmt.Errorf("stream_url is empty")
+	}
 	urls := strings.Split(f.streamURL, "?")
 	streamURL := fmt.Sprintf("%s?starttime=%s&endtime=%s", urls[0], starttime, endtime)
 	f.streamURL = streamURL
@@ -61,7 +64,7 @@ func (f *FFmpegObj) startFFmpeg() (*exec.Cmd, error) {
 	// 这里指定你的 ffmpeg 命令和参数
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	log := logger.GetLoggerInstance()
+	log := logger.GetLogger("ffmpegobj.log", false)
 	if f.streamURL == "" || f.hlsURL == "" {
 		return nil, fmt.Errorf("stream_url or hls_url is empty")
 	}
@@ -96,7 +99,7 @@ func (f *FFmpegObj) startFFmpeg() (*exec.Cmd, error) {
 	go io.Copy(ffmpegLogger.Writer(), stderr)
 
 	log.Printf("%s", cmd.Args)
-	log.Printf("FFmpeg started: %s %s\n", f.streamConfig.StreamURL, f.streamConfig.HLSURL)
+	log.Printf("FFmpeg started: %s %s", f.streamURL, f.hlsURL)
 	log.Printf("FFMPEG pid:%d state:%s", cmd.Process.Pid, cmd.ProcessState.String())
 	return cmd, nil
 }

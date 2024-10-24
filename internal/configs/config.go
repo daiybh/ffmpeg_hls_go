@@ -13,9 +13,13 @@ type Config struct {
 	Server struct {
 		Port int `yaml:"port"`
 	} `yaml:"server"`
-
+	TokenServer struct {
+		UserName    string `yaml:"username"`
+		Password    string `yaml:"password"`
+		TokenApiUrl string `yaml:"token_api_url"`
+	} `yaml:"token_server"`
 	Logging struct {
-		LogFile    string `yaml:"log_file"`
+		LogPath    string `yaml:"log_path"`
 		MaxSize    int    `yaml:"max_size"`
 		MaxBackups int    `yaml:"max_backups"`
 		MaxAge     int    `yaml:"max_age"`
@@ -43,7 +47,7 @@ type StreamConfig struct {
 func CreateDefaultConfig() *Config {
 	config := &Config{}
 	config.Server.Port = 8080
-	config.Logging.LogFile = "log/server.log"
+	config.Logging.LogPath = "log/"
 	config.Logging.MaxSize = 10
 	config.Logging.MaxBackups = 3
 	config.Logging.MaxAge = 30
@@ -74,6 +78,9 @@ func CreateDefaultConfig() *Config {
 		},
 	}
 
+	config.TokenServer.UserName = "42536518181156892813"
+	config.TokenServer.Password = "LN1c0eZsilRvgl2Mt5bZJIzeqtYkqN"
+	config.TokenServer.TokenApiUrl = "https://t.jdc.taep.org.cn:17701/api/v1/token/getAccessToken"
 	return config
 }
 
